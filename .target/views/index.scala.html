@@ -1,0 +1,56 @@
+@(message: String) @main("Main") {
+
+	<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/login.css")">
+	
+	<div class="row">
+	  <div class="col-md-12">
+		<legend>Search parameters</legend>
+		<form method="POST" action="#" id="form" class="form-horizontal" accept-charset="UTF-8" role="form">
+			<div class="form-group">
+				<label for="location" class="col-lg-2 control-label">Location</label>
+				<div class="col-lg-6">
+					<input type="text" id="location" class="form-control" name="location" value="Eiffel Tower" />
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="date" class="col-lg-2 control-label">Date</label>
+				<div class="col-lg-6">
+					<input id="date" class="form-control" name="date" placeholder="" type="date" value="2013-09-16"/>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="time" class="col-lg-2 control-label">Time</label>
+				<div class="col-lg-6">
+					<input id="time" class="form-control" name="time" placeholder="" type="time" value="10:00"/>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="col-lg-6">
+					<button type="submit" id="submit" name="submit" class="btn">Search</button>
+				</div>
+			</div>
+		</form>
+	  </div>
+	</div>
+
+    <div id="myCarousel" class="carousel slide">
+      <ol class="carousel-indicators" id="indicators">
+      </ol>
+      <!-- Carousel items -->
+      <div class="carousel-inner" id="gallery">
+      </div>
+      <!-- Carousel nav -->
+      <a class="carousel-control left" href="#myCarousel" data-slide="prev">&lsaquo;</a>
+      <a class="carousel-control right" href="#myCarousel" data-slide="next">&rsaquo;</a>
+    </div>
+
+	<div>
+		<span class="status1 label label-info">Standing by...</span>
+		<span class="status2 label label-danger">Processing geolocation...</span>
+		<span class="status3 label label-danger">Retrieving data from Instagram...</span>
+		<span class="status4 label label-success">Process Complete!</span>
+	</div>	 
+}
