@@ -1,5 +1,20 @@
 $( "#form" ).submit(function( event ) {
 	
+	$('.status2').hide();
+	$('.status3').hide();
+	$('.status4').hide();
+	$('.carousel').hide();
+	
+	var myNode = document.getElementById("indicators");
+	while (myNode.firstChild) {
+	    myNode.removeChild(myNode.firstChild);
+	}
+	
+	var myNode = document.getElementById("gallery");
+	while (myNode.firstChild) {
+	    myNode.removeChild(myNode.firstChild);
+	}
+		
 	console.log(document.getElementById("date").value);
 	console.log(document.getElementById("time").value);
 	console.log(document.getElementById("location").value);
