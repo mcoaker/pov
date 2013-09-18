@@ -1,9 +1,9 @@
+
 $( "#form" ).submit(function( event ) {
 	
-	$('.status2').hide();
-	$('.status3').hide();
-	$('.status4').hide();
+	$('#pleaseWaitDialog').modal();
 	$('.carousel').hide();
+	$('.carousel').carousel('pause')
 	
 	var myNode = document.getElementById("indicators");
 	while (myNode.firstChild) {
@@ -14,66 +14,80 @@ $( "#form" ).submit(function( event ) {
 	while (myNode.firstChild) {
 	    myNode.removeChild(myNode.firstChild);
 	}
-		
-	console.log(document.getElementById("date").value);
-	console.log(document.getElementById("time").value);
-	console.log(document.getElementById("location").value);
 	
-	var date = document.getElementById("date").value;
-	var time = document.getElementById("time").value;
+	var myNode = document.getElementById("locations");
+	while (myNode.firstChild) {
+	    myNode.removeChild(myNode.firstChild);
+	}
+	
 	var location = document.getElementById("location").value;
-		
-	var d = new Date(date.substr(0,4), date.substr(5,2)-1, date.substr(8,2), time.substr(0,2), time.substr(3,2), 0);
-	
-	var dateFrom = new Date(d);
-	dateFrom.setHours(d.getHours()-3);
-	var dateTo = new Date(d);
-	dateTo.setHours(d.getHours()+3);
-	
-	console.log(d);
-	console.log(dateFrom);
-	console.log(dateTo);
-	
-	var fromTime = dateFrom.getTime()/1000;
-	var toTime = dateTo.getTime()/1000;
-	
-	getGeoCode(location, fromTime, toTime);
+	getGeoCode(location);
 	
 	event.preventDefault();
 });
 
 $(document).ready(function(){
 	
-	$('.status2').hide();
-	$('.status3').hide();
-	$('.status4').hide();
-	
 	$('.carousel').hide();
+	
 });
 
-function getGeoCode (address, from, to) {
-	
-	$('.status1').hide();
-	$('.status2').show();	
+function getGeoCode (address) {
 	
 	var lat = 0;
 	var lng = 0;
 	
 	var geocoderUrl = "https://maps.googleapis.com/maps/api/geocode/json?sensor=false&address=" + encodeURIComponent(address);
-        
-    $.getJSON(geocoderUrl, function(data){
-    	console.log(data);
-    	lat = data.results[0].geometry.location.lat;
-    	lng = data.results[0].geometry.location.lng;
     	
-    	getPictures (lat, lng, from, to);
+    $.getJSON(geocoderUrl, function(data){
+    	if (data.results.length == 0) {
+    		$('#pleaseWaitDialog').modal('hide');
+    		$('#noResults').modal('show');
+    	} else if (data.results.length == 1) {
+    		lat = data.results[0].geometry.location.lat;
+    		lng = data.results[0].geometry.location.lng;
+    	   	getPictures (lat, lng);
+    	} else if (data.results.length > 0) {
+    		$('#pleaseWaitDialog').modal('hide');
+    		showModal(data);
+    	}
     });
 };
 
-function getPictures (lat, lng, from, to) {
+function showModal(data) {
+
+	$.each(data.results, function(i,item){
+
+		var selected = '';
+		if (i==0) selected = 'selected';
+		
+		var value = item.geometry.location.lat + "|" + item.geometry.location.lng;
+		var text = item.formatted_address;
+		
+		$("#locations").append('<option value=' + value + ' ' + selected + '>' + text + '</option>');
+        
+	});
 	
-	$('.status2').hide();
-	$('.status3').show();	
+	$('#locationOptions').modal('show');
+
+}
+
+function getPictures (lat, lng) {
+	
+	var date = document.getElementById("date").value;
+	var time = document.getElementById("time").value;
+
+	var offset = parseInt(document.getElementById("offset").value);
+
+	var d = new Date(date.substr(0,4), date.substr(5,2)-1, date.substr(8,2), time.substr(0,2), time.substr(3,2), 0);
+	
+	var dateFrom = new Date(d);
+	dateFrom.setHours(d.getHours()-offset);
+	var dateTo = new Date(d);
+	dateTo.setHours(d.getHours()+offset);
+		
+	var from = dateFrom.getTime()/1000;
+	var to = dateTo.getTime()/1000;
 	
 	var instagramUrl = "https://api.instagram.com/v1/media/search?lat=" + lat + 
 			"&lng=" + lng + 
@@ -81,16 +95,16 @@ function getPictures (lat, lng, from, to) {
 			"&min_timestamp=" + from + 
 			"&max_timestamp=" + to +
 			"&callback=?";
-	    
+
+	console.log(instagramUrl);
+	
     $.getJSON(instagramUrl, function(data){
-    	console.log(data);
     	$.each(data.data, function(i,item){
 
+    		var caption = '';
     		try {
-    			var caption = item.caption.text;
-    		} catch (e) {
-    			var caption = "Nothing to say...";
-    		}
+    			caption = item.caption.text;
+    		} catch (e) {}
     		
     		//Adds img to carousel
     		var newDiv = document.createElement("DIV");
@@ -114,35 +128,44 @@ function getPictures (lat, lng, from, to) {
     		newLi.setAttribute("data-slide-to", i);
     		if (i==0) newLi.className = "active";
     		
-    		document.getElementById("indicators").appendChild(newLi);
+    		//document.getElementById("indicators").appendChild(newLi);
             
     	});
     	
-    	displayCarousel();
+    	if (data.data.length > 0) {
+    		displayCarousel();
+    	} else {
+    		$('#pleaseWaitDialog').modal('hide');
+    		$('#noResults').modal('show');
+    	}
     	
     });
 };
 
 function displayCarousel () {
-	$('.status3').hide();
-	$('.status4').show();
-	
+
+	$('.carousel').unbind();
 	$('.carousel').show();
-	
 	$('.carousel').carousel();
+	$('.carousel').carousel('cycle')
+	
+	$('#pleaseWaitDialog').modal('hide');
 }
 
 function timestamp2date (timestamp) {
-	// create a new javascript Date object based on the timestamp
-	// multiplied by 1000 so that the argument is in milliseconds, not seconds
 	var date = new Date(timestamp*1000);
-	// hours part from the timestamp
 	var hours = date.getHours();
-	// minutes part from the timestamp
 	var minutes = date.getMinutes();
-	// seconds part from the timestamp
 	var seconds = date.getSeconds();
-
-	// will display time in 10:30:23 format
 	return hours + ':' + minutes + ':' + seconds;
 }
+
+$( "#selectLocation" ).click(function() {
+	$('#locationOptions').modal('hide');
+	
+	var coord = $("#locations").val().split('|');
+	
+	$('#pleaseWaitDialog').modal('show');
+	
+	getPictures (coord[0], coord[1]);
+});

@@ -1,56 +1,105 @@
 @(message: String) @main("Main") {
-
-	<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/login.css")">
 	
+	<form method="POST" action="#" id="form" accept-charset="UTF-8" role="form">
+	
+		<div class="row">
+			<div class="col-md-8 col-md-offset-2 form-group">
+				<legend>Search parameters</legend>
+	    	</div>
+	    </div>
+	
+	    <div class="row">
+			<div class="col-md-8 col-md-offset-2 form-group">
+				<label for="location" class="control-label">Location</label>
+				<input type="text" id="location" class="form-control" name="location" value="Eiffel Tower" />
+	    	</div>
+	    </div>
+	    <div class="row">
+	    	<div class="col-md-3 col-md-offset-2 form-group">	
+				<label for="date" class="control-label">Date</label>
+				<input id="date" class="form-control" name="date" placeholder="" type="date" value="2013-09-16"/>
+			</div>
+			<div class="col-md-3 form-group">
+				<label for="time" class="control-label">Time</label>
+				<input id="time" class="form-control" name="time" placeholder="" type="time" value="10:00"/>
+			</div>
+			<div class="col-md-2 form-group">
+				<label for="offset" class="control-label">Time Span</label>
+				<div class="input-group">
+					<span class="input-group-addon">&plusmn;</span>
+					<input id="offset" class="form-control" name="offset" placeholder="" value="3" type="number" min="1" max="6"/>
+				</div>
+	    	</div>
+		</div>
+		<div class="row">
+			<div class="col-md-8 col-md-offset-2 form-group">
+				<button type="submit" id="submit" name="submit" class="btn btn-default pull-right">Search</button>
+	    	</div>
+		</div>
+	</form>
+
 	<div class="row">
-	  <div class="col-md-12">
-		<legend>Search parameters</legend>
-		<form method="POST" action="#" id="form" class="form-horizontal" accept-charset="UTF-8" role="form">
-			<div class="form-group">
-				<label for="location" class="col-lg-2 control-label">Location</label>
-				<div class="col-lg-6">
-					<input type="text" id="location" class="form-control" name="location" value="Eiffel Tower" />
-				</div>
-			</div>
-
-			<div class="form-group">
-				<label for="date" class="col-lg-2 control-label">Date</label>
-				<div class="col-lg-6">
-					<input id="date" class="form-control" name="date" placeholder="" type="date" value="2013-09-16"/>
-				</div>
-			</div>
-
-			<div class="form-group">
-				<label for="time" class="col-lg-2 control-label">Time</label>
-				<div class="col-lg-6">
-					<input id="time" class="form-control" name="time" placeholder="" type="time" value="10:00"/>
-				</div>
-			</div>
-
-			<div class="form-group">
-				<div class="col-lg-6">
-					<button type="submit" id="submit" name="submit" class="btn">Search</button>
-				</div>
-			</div>
-		</form>
-	  </div>
+	    <div id="myCarousel" class="carousel slide col-md-10 col-md-offset-1">
+	      <ol class="carousel-indicators" id="indicators">
+	      </ol>
+	      
+	      <!-- Carousel items -->
+	      <div class="carousel-inner" id="gallery"></div>
+	      
+	      <!-- Carousel nav -->
+	      <a class="left carousel-control" href="#myCarousel" data-slide="prev"><span class="icon-prev"></span></a>
+	      <a class="right carousel-control" href="#myCarousel" data-slide="next"><span class="icon-next"></span></a>
+  
+	    </div>
 	</div>
 
-    <div id="myCarousel" class="carousel slide">
-      <ol class="carousel-indicators" id="indicators">
-      </ol>
-      <!-- Carousel items -->
-      <div class="carousel-inner" id="gallery">
-      </div>
-      <!-- Carousel nav -->
-      <a class="carousel-control left" href="#myCarousel" data-slide="prev">&lsaquo;</a>
-      <a class="carousel-control right" href="#myCarousel" data-slide="next">&rsaquo;</a>
-    </div>
+    <div class="modal fade"  id="locationOptions">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        <h4 class="modal-title">Select location</h4>
+	      </div>
+	      <div class="modal-body">
+	        <select class="form-control" id="locations">
+			</select>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	        <button type="button" id="selectLocation" class="btn btn-primary">Accept</button>
+	      </div>
+	    </div><!-- /.modal-content -->
+	  </div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
 
-	<div>
-		<span class="status1 label label-info">Standing by...</span>
-		<span class="status2 label label-danger">Processing geolocation...</span>
-		<span class="status3 label label-danger">Retrieving data from Instagram...</span>
-		<span class="status4 label label-success">Process Complete!</span>
-	</div>	 
+	    
+    <div class="modal fade"  id="pleaseWaitDialog" data-backdrop="static" data-keyboard="false">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        <h4 class="modal-title">Processing...</h4>
+	      </div>
+	      <div class="modal-body">
+	        <div class="progress progress-striped active">
+			  <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+			  </div>
+			</div>
+	      </div>
+	    </div><!-- /.modal-content -->
+	  </div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+	
+    <div class="modal fade"  id="noResults" data-backdrop="static" data-keyboard="false">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        <h4 class="modal-title">Error</h4>
+	      </div>
+	      <div class="modal-body">
+	        <h5 class="modal-title">No Results have been found matching this criteria</h5>
+	    </div><!-- /.modal-content -->
+	  </div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->	
 }
