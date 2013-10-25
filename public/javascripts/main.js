@@ -4,16 +4,14 @@ var gLng = 0;
 var gFrom = 0;
 var gTo = 0;
 
+var clip = new ZeroClipboard( $("#share"), {
+	  moviePath: "/assets/javascripts/ZeroClipboard.swf"
+	} );
+
 $(document).ready(function(){
 	
 	$('#share').hide();
 	$('.carousel').hide();
-	$('#share').popover({ html : true })
-	
-	$('a#shareUrl').zclip({
-		path:'/assets/javascripts/ZeroClipboard.swf',
-		copy:function(){return getShareUrl();}
-	});
 	
 });
 
@@ -192,14 +190,15 @@ $( "#selectLocation" ).click(function() {
 
 function getShareUrl() {
 	var pathname = window.location;
-	var shareUrl = pathname + "?lat=" + gLat + "&lng=" + gLng + "&from=" + gFrom + "&gTo=" + gTo; 
+	var shareUrl = pathname + "?lat=" + gLat + "&lng=" + gLng + "&from=" + gFrom + "&to=" + gTo; 
 	console.log(shareUrl);
 	return shareUrl;
 }
 
-$('#share').on('show.bs.popover', function () {
-	
-	$('#share').attr('data-content', '<a id="shareUrl" href="#">Copy to Clipboard</a>'); 
-})
+clip.on( 'dataRequested', function (client, args) {
+	client.setText( getShareUrl() );
+	});
 
-
+clip.on( 'complete', function ( client, args ) {
+	  alert("Copied URL to clipboard");
+	} );
