@@ -32,11 +32,21 @@
 	    	</div>
 		</div>
 		<div class="row">
-			<div class="col-md-8 col-md-offset-2 form-group">
-				<button type="submit" id="submit" name="submit" class="btn btn-default pull-right">Search</button>
+			<div class="col-md-4 col-md-offset-2">
+				<button type="button" class="btn btn-default" data-container="body" data-toggle="popover" 
+				data-placement="bottom" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus."
+				id="share" data-original-title="" title="">
+				  <span class="glyphicon glyphicon-share-alt"></span> Share
+				</button>			
+	   		</div>
+			<div class="col-md-4 form-group">
+				<button type="submit" id="submit" name="submit" class="btn btn-default pull-right">
+				  <span class="glyphicon glyphicon-search"></span> Search
+				</button>
 	    	</div>
 		</div>
 	</form>
+
 
 	<div class="row">
 	    <div id="myCarousel" class="carousel slide col-md-10 col-md-offset-1">
@@ -102,4 +112,5 @@
 	    </div><!-- /.modal-content -->
 	  </div><!-- /.modal-dialog -->
 	</div><!-- /.modal -->	
+	
 }

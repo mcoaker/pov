@@ -1,9 +1,28 @@
+//global vars
+var gLat = 0;
+var gLng = 0;
+var gFrom = 0;
+var gTo = 0;
+
+$(document).ready(function(){
+	
+	$('#share').hide();
+	$('.carousel').hide();
+	$('#share').popover({ html : true })
+	
+	$('a#shareUrl').zclip({
+		path:'/assets/javascripts/ZeroClipboard.swf',
+		copy:function(){return getShareUrl();}
+	});
+	
+});
 
 $( "#form" ).submit(function( event ) {
 	
 	$('#pleaseWaitDialog').modal();
 	$('.carousel').hide();
 	$('.carousel').carousel('pause')
+	$('#share').hide();
 	
 	var myNode = document.getElementById("indicators");
 	while (myNode.firstChild) {
@@ -24,12 +43,6 @@ $( "#form" ).submit(function( event ) {
 	getGeoCode(location);
 	
 	event.preventDefault();
-});
-
-$(document).ready(function(){
-	
-	$('.carousel').hide();
-	
 });
 
 function getGeoCode (address) {
@@ -85,15 +98,17 @@ function getPictures (lat, lng) {
 	dateFrom.setHours(d.getHours()-offset);
 	var dateTo = new Date(d);
 	dateTo.setHours(d.getHours()+offset);
-		
-	var from = dateFrom.getTime()/1000;
-	var to = dateTo.getTime()/1000;
+	
+	gLat = lat;
+	gLng = lng;
+	gFrom = dateFrom.getTime()/1000;
+	gTo = dateTo.getTime()/1000;
 	
 	var instagramUrl = "https://api.instagram.com/v1/media/search?lat=" + lat + 
 			"&lng=" + lng + 
 			"&access_token=558673112.801eb26.92d30178271a438cb4b647635707af93" + 
-			"&min_timestamp=" + from + 
-			"&max_timestamp=" + to +
+			"&min_timestamp=" + gFrom + 
+			"&max_timestamp=" + gTo +
 			"&callback=?";
 
 	console.log(instagramUrl);
@@ -134,6 +149,7 @@ function getPictures (lat, lng) {
     	
     	if (data.data.length > 0) {
     		displayCarousel();
+    		displayShareBtn();
     	} else {
     		$('#pleaseWaitDialog').modal('hide');
     		$('#noResults').modal('show');
@@ -152,6 +168,12 @@ function displayCarousel () {
 	$('#pleaseWaitDialog').modal('hide');
 }
 
+function displayShareBtn () {
+
+	$('#share').show();
+
+}
+
 function timestamp2date (timestamp) {
 	var date = new Date(timestamp*1000);
 	var hours = date.getHours();
@@ -161,11 +183,23 @@ function timestamp2date (timestamp) {
 }
 
 $( "#selectLocation" ).click(function() {
-	$('#locationOptions').modal('hide');
-	
+	$('#locationOptions').modal('hide');	
 	var coord = $("#locations").val().split('|');
-	
 	$('#pleaseWaitDialog').modal('show');
 	
 	getPictures (coord[0], coord[1]);
 });
+
+function getShareUrl() {
+	var pathname = window.location;
+	var shareUrl = pathname + "?lat=" + gLat + "&lng=" + gLng + "&from=" + gFrom + "&gTo=" + gTo; 
+	console.log(shareUrl);
+	return shareUrl;
+}
+
+$('#share').on('show.bs.popover', function () {
+	
+	$('#share').attr('data-content', '<a id="shareUrl" href="#">Copy to Clipboard</a>'); 
+})
+
+
