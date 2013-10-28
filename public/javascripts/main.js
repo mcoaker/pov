@@ -1,9 +1,3 @@
-//global vars
-var gLat = 0;
-var gLng = 0;
-var gFrom = 0;
-var gTo = 0;
-
 var clip = new ZeroClipboard( $("#share"), {
 	  moviePath: "/assets/javascripts/ZeroClipboard.swf"
 	} );
@@ -13,6 +7,10 @@ $(document).ready(function(){
 	$('#share').hide();
 	$('.carousel').hide();
 	
+	document.getElementById("date").value = getDateToday();
+	document.getElementById("time").value = getTimeToday();
+	
+	checkParams();
 });
 
 $( "#form" ).submit(function( event ) {
@@ -43,6 +41,14 @@ $( "#form" ).submit(function( event ) {
 	event.preventDefault();
 });
 
+clip.on( 'dataRequested', function (client, args) {
+	client.setText( getShareUrl() );
+	});
+
+clip.on( 'complete', function ( client, args ) {
+	$('#notification').modal('show');
+	});
+
 function getGeoCode (address) {
 	
 	var lat = 0;
@@ -66,9 +72,7 @@ function getGeoCode (address) {
 };
 
 function showModal(data) {
-
 	$.each(data.results, function(i,item){
-
 		var selected = '';
 		if (i==0) selected = 'selected';
 		
@@ -76,11 +80,9 @@ function showModal(data) {
 		var text = item.formatted_address;
 		
 		$("#locations").append('<option value=' + value + ' ' + selected + '>' + text + '</option>');
-        
 	});
 	
 	$('#locationOptions').modal('show');
-
 }
 
 function getPictures (lat, lng) {
@@ -97,18 +99,21 @@ function getPictures (lat, lng) {
 	var dateTo = new Date(d);
 	dateTo.setHours(d.getHours()+offset);
 	
-	gLat = lat;
-	gLng = lng;
-	gFrom = dateFrom.getTime()/1000;
-	gTo = dateTo.getTime()/1000;
+	var from = dateFrom.getTime()/1000;
+	var to = dateTo.getTime()/1000;
+	
+	retrievFromInstagram (lat, lng, from, to);
+}
+	
+function retrievFromInstagram (lat, lng, from, to) {
 	
 	var instagramUrl = "https://api.instagram.com/v1/media/search?lat=" + lat + 
 			"&lng=" + lng + 
 			"&access_token=558673112.801eb26.92d30178271a438cb4b647635707af93" + 
-			"&min_timestamp=" + gFrom + 
-			"&max_timestamp=" + gTo +
+			"&min_timestamp=" + from + 
+			"&max_timestamp=" + to +
 			"&callback=?";
-
+	
 	console.log(instagramUrl);
 	
     $.getJSON(instagramUrl, function(data){
@@ -140,9 +145,7 @@ function getPictures (lat, lng) {
     		newLi.setAttribute("data-target", "#myCarousel");
     		newLi.setAttribute("data-slide-to", i);
     		if (i==0) newLi.className = "active";
-    		
-    		//document.getElementById("indicators").appendChild(newLi);
-            
+    	
     	});
     	
     	if (data.data.length > 0) {
@@ -157,7 +160,6 @@ function getPictures (lat, lng) {
 };
 
 function displayCarousel () {
-
 	$('.carousel').unbind();
 	$('.carousel').show();
 	$('.carousel').carousel();
@@ -167,9 +169,7 @@ function displayCarousel () {
 }
 
 function displayShareBtn () {
-
 	$('#share').show();
-
 }
 
 function timestamp2date (timestamp) {
@@ -189,16 +189,51 @@ $( "#selectLocation" ).click(function() {
 });
 
 function getShareUrl() {
-	var pathname = window.location;
-	var shareUrl = pathname + "?lat=" + gLat + "&lng=" + gLng + "&from=" + gFrom + "&to=" + gTo; 
+	var pathname = window.location.host;
+	var d = document.getElementById("date").value;
+	var t = document.getElementById("time").value;
+	var l = document.getElementById("location").value;
+	var o = parseInt(document.getElementById("offset").value);
+	var shareUrl = "http://" + pathname + "/?l=" + encodeURIComponent(l) + "&d=" + encodeURIComponent(d) + "&t=" + encodeURIComponent(t) + "&o=" + encodeURIComponent(o); 
 	console.log(shareUrl);
 	return shareUrl;
 }
 
-clip.on( 'dataRequested', function (client, args) {
-	client.setText( getShareUrl() );
-	});
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
 
-clip.on( 'complete', function ( client, args ) {
-	  alert("Copied URL to clipboard");
-	} );
+function checkParams() {
+	var l = getParameterByName('l');
+	var d = getParameterByName('d');
+	var t = getParameterByName('t');
+	var o = getParameterByName('o');
+	
+	if (l != "" && d != "" && t != "" && o != "") {
+		document.getElementById("location").value = decodeURIComponent(l);
+		document.getElementById("offset").value = decodeURIComponent(o);
+		document.getElementById("date").value = decodeURIComponent(d);
+		document.getElementById("time").value = decodeURIComponent(t);
+		$('#form').submit();
+	}
+}
+
+function getDateToday() {
+	var date = new Date();
+	var year = date.getFullYear(), month = (date.getMonth() + 1), day = date.getDate();
+	if (month < 10) month = "0" + month;
+	if (day < 10) day = "0" + day;
+
+	return "" + year + "-" + month + "-" + day;
+}
+
+function getTimeToday() {
+	var today = new Date();
+    var h = today.getHours();
+    if (h < 10) h = "0" + h;
+	
+	return "" + h + ":00";
+}
